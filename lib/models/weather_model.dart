@@ -13,13 +13,13 @@ class WeatherModel {
       required this.minTemp});
   factory WeatherModel.fromJson(dynamic data) {
     var jsonData = data['forecast']['forecastday'][0]['day'];
-    // print(jsonData);
+    print(jsonData);
     return WeatherModel(
-      date: data['location']['localtime'],
-      weatherStateName: jsonData['condition']['text'],
-      temp: data['avgtemp_c'],
-      maxTemp: data['maxtemp_c'],
-      minTemp: data['mintemp_c'],
+      date: data['location']['localtime'] ?? 'Unknown',
+      weatherStateName: jsonData['condition']['text'] ?? 'Unknown',
+      temp: data['avgtemp_c'].toDouble() ?? 0.0,
+      maxTemp: data['maxtemp_c'].toDouble() ?? 0.0,
+      minTemp: data['mintemp_c'].toDouble() ?? 0.0,
     );
   }
   @override

@@ -26,16 +26,22 @@ class SearchPage extends StatelessWidget {
               hintText: 'Enter a city',
               border: OutlineInputBorder(),
               suffixIcon: Icon(Icons.search),
-              label: Text('search'),
+              label: Text('Search'),
               contentPadding: EdgeInsets.symmetric(horizontal: 16),
             ),
             onSubmitted: (data) async {
               cityName = data;
               WeatherService service = WeatherService();
-              WeatherModel weather =
-                  await service.getWeather(cityName: cityName!);
-              weatherData = weather;
-              Navigator.pop(context);
+              try {
+                WeatherModel weather =
+                    await service.getWeather(cityName: cityName!);
+                weatherData = weather;
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                print('Error fetching weather data: ${e.toString()}');
+              }
             },
           ),
         ),
