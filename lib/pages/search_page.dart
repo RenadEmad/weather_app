@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_app/models/weather_model.dart';
+import 'package:weather_app/providers/weather_provider.dart';
 import 'package:weather_app/services/weather_service.dart';
 
 class SearchPage extends StatelessWidget {
   String? cityName;
+  VoidCallback? updatedUi;
 
-  SearchPage({super.key});
+  SearchPage({super.key, this.updatedUi});
 
   @override
   Widget build(BuildContext context) {
@@ -22,26 +25,43 @@ class SearchPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Center(
           child: TextField(
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Enter a city',
-              border: OutlineInputBorder(),
-              suffixIcon: Icon(Icons.search),
-              label: Text('Search'),
-              contentPadding: EdgeInsets.symmetric(horizontal: 16),
+              border: const OutlineInputBorder(),
+              suffixIcon: GestureDetector(
+                onTap: () async {
+                  WeatherService service = WeatherService();
+
+                  WeatherModel weather =
+                      await service.getWeather(cityName: cityName!);
+                  Provider.of<WeatherProvider>(context, listen: false)
+                      .weatherData = weather;
+                  Provider.of<WeatherProvider>(context, listen: false)
+                      .cityName = cityName;
+
+                  Navigator.pop(context);
+                },
+                child: const Icon(Icons.search),
+              ),
+              label: const Text('Search'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
+            onChanged: (data) {
+              cityName = data;
+            },
             onSubmitted: (data) async {
               cityName = data;
               WeatherService service = WeatherService();
-              try {
-                WeatherModel weather =
-                    await service.getWeather(cityName: cityName!);
-                weatherData = weather;
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              } catch (e) {
-                print('Error fetching weather data: ${e.toString()}');
-              }
+
+              WeatherModel weather =
+                  await service.getWeather(cityName: cityName!);
+              Provider.of<WeatherProvider>(context, listen: false).weatherData =
+                  weather;
+              Provider.of<WeatherProvider>(context, listen: false).cityName =
+                  cityName;
+
+              Navigator.pop(context);
+              // updatedUi!();
             },
           ),
         ),
@@ -49,5 +69,3 @@ class SearchPage extends StatelessWidget {
     );
   }
 }
-
-WeatherModel? weatherData;
